@@ -129,9 +129,9 @@ export default function Sidebar({ apps, active, setActive, isAr, t }: Props) {
             width: 32, height: 32, borderRadius: '50%', border: '2px solid #2a2a2a',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             background: '#fafaf7', fontWeight: 800, fontSize: 11, flexShrink: 0,
-          }}>AH</div>
+          }}>YK</div>
           <div>
-            <div style={{ fontSize: 12, fontWeight: 700 }}>Ahmad H.</div>
+            <div style={{ fontSize: 12, fontWeight: 700 }}>Yahya Khaled</div>
             <div style={{ fontSize: 10, opacity: 0.65 }}>{t('Senior Presales', 'ما قبل البيع')}</div>
           </div>
         </div>

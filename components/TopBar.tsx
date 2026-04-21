@@ -22,7 +22,7 @@ export default function TopBar({ title, lang, setLang, t }: Props) {
       <div>
         <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1 }}>{title}.</div>
         <div style={{ fontSize: 11, opacity: 0.6, marginTop: 3 }}>
-          {t('Ahmad · ', 'أحمد · ')}{dateStr}
+          {t('Yahya · ', 'يحيى · ')}{dateStr}
         </div>
       </div>
       <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>

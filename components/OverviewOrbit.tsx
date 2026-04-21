@@ -71,7 +71,8 @@ function RolePie({ isAr }: { isAr: boolean }) {
 
 export default function OverviewOrbit({ lang, t }: Props) {
   const isAr = lang === 'ar';
-  const W = 980, H = 780;
+  // Content area: 1440 - 230px sidebar - 48px padding = 1162px
+  const W = 1162, H = 780;
   const cx = W / 2, cy = H / 2 + 10;
   const R1 = 210;
 

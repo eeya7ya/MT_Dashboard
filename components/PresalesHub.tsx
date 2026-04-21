@@ -6,6 +6,7 @@ import TopBar from './TopBar';
 import OverviewOrbit from './OverviewOrbit';
 import LauncherCard from './LauncherCard';
 import ManufacturerBar from './ManufacturerBar';
+import DesignerHub from './DesignerHub';
 
 export default function PresalesHub() {
   const [lang, setLang] = useState<'en' | 'ar'>('en');
@@ -34,8 +35,12 @@ export default function PresalesHub() {
       launcher: true,
       url: 'https://pricing-sheet-six.vercel.app/',
     },
+    {
+      id: 'designer',
+      icon: '📁',
+      label: t('Designer', 'المصمم'),
+    },
     { id: '_soon1', icon: '＋', label: t('Add app', 'إضافة تطبيق'), soon: true },
-    { id: '_soon2', icon: '＋', label: t('Add app', 'إضافة تطبيق'), soon: true },
   ];
 
   const activeApp = apps.find((a) => a.id === active);
@@ -118,6 +123,9 @@ export default function PresalesHub() {
               icon="$"
               t={t}
             />
+          )}
+          {active === 'designer' && (
+            <DesignerHub t={t} />
           )}
         </div>
 

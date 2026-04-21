@@ -1,0 +1,70 @@
+:root {
+  --mt-paper: #e9e5dc;
+  --mt-paper-light: #fafaf7;
+  --mt-sidebar: #f4f1ea;
+  --mt-ink: #2a2a2a;
+  --mt-red: #E30613;
+  --mt-dash: #2a2a2a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--mt-paper);
+  font-family: var(--font-kalam), "Kalam", "Patrick Hand", "Comic Sans MS",
+    cursive;
+  color: var(--mt-ink);
+  min-height: 100vh;
+}
+
+a { color: inherit; }
+
+@keyframes mt-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes mt-orbit-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes mt-orbit-counter {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mt-orbit-spin,
+  .mt-orbit-counter,
+  .mt-marquee {
+    animation: none !important;
+  }
+}
+
+/* Artboard holds the fixed 1440×900 wireframe. We scale it down on smaller
+   viewports so the layout stays faithful without horizontal scroll. */
+.mt-artboard-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.mt-artboard {
+  width: 1440px;
+  height: 900px;
+  flex: 0 0 auto;
+  transform-origin: top center;
+}
+
+@media (max-width: 1480px) {
+  .mt-artboard { transform: scale(calc((100vw - 40px) / 1440)); }
+  .mt-artboard-wrap { padding-bottom: calc(100vh - (900px * (100vw - 40px) / 1440) - 40px); }
+}

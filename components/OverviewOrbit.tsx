@@ -71,7 +71,8 @@ function RolePie({ isAr }: { isAr: boolean }) {
 
 export default function OverviewOrbit({ lang, t }: Props) {
   const isAr = lang === 'ar';
-  const W = 980, H = 780;
+  // Content area: 1440 - 230px sidebar - 48px padding = 1162px
+  const W = 1162, H = 780;
   const cx = W / 2, cy = H / 2 + 10;
   const R1 = 210;
 
@@ -119,7 +120,7 @@ export default function OverviewOrbit({ lang, t }: Props) {
   return (
     <div style={{ position: 'relative', width: '100%', height: 780, overflow: 'hidden' }}>
 
-      {/* Left rail: role card + responsibilities */}
+      {/* Left rail */}
       <div style={{ position: 'absolute', top: 0, left: 0, width: 255, zIndex: 3 }}>
         <Panel>
           <Pill red>{t('THE ROLE', 'الدور')}</Pill>
@@ -137,7 +138,6 @@ export default function OverviewOrbit({ lang, t }: Props) {
             )}
           </div>
         </Panel>
-
         <div style={{ marginTop: 12 }}>
           <Panel>
             <Pill>{t('KEY RESPONSIBILITIES', 'المهام الرئيسية')}</Pill>
@@ -160,7 +160,7 @@ export default function OverviewOrbit({ lang, t }: Props) {
         </div>
       </div>
 
-      {/* Right rail: systems + skills */}
+      {/* Right rail */}
       <div style={{ position: 'absolute', top: 0, right: 0, width: 255, zIndex: 3 }}>
         <Panel>
           <Pill>{t('SYSTEMS COVERED', 'الأنظمة المغطاة')}</Pill>
@@ -174,7 +174,6 @@ export default function OverviewOrbit({ lang, t }: Props) {
             ))}
           </div>
         </Panel>
-
         <div style={{ marginTop: 12 }}>
           <Panel>
             <Pill red>{t('CORE SKILLS', 'المهارات الأساسية')}</Pill>
@@ -211,8 +210,6 @@ export default function OverviewOrbit({ lang, t }: Props) {
             );
           })}
         </svg>
-
-        {/* Ring nodes — counter-rotate so labels stay upright */}
         {core.map((c, i) => {
           const p = polar(R1, c.a);
           const inner = (

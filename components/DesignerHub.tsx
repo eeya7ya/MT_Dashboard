@@ -40,6 +40,60 @@ const CLAUDE_LINKS: DesignerLink[] = [
     icon: '⌨',
     accent: '#2a2a2a',
   },
+  {
+    id: 'email-responder',
+    label: 'Email Responder',
+    labelAr: 'الرد على البريد الإلكتروني',
+    url: 'https://claude.ai/project/019db18b-9912-721a-8ade-8fe48c0a65a5',
+    icon: '✉',
+    accent: '#E30613',
+  },
+  {
+    id: 'quotation-tracker',
+    label: 'Quotation Database Tracker',
+    labelAr: 'متتبع قاعدة عروض الأسعار',
+    url: 'https://claude.ai/project/019d8f74-aa70-766b-a2b0-3352a3858ab8',
+    icon: '$',
+    accent: '#2a2a2a',
+  },
+];
+
+const HIKVISION_LINKS: DesignerLink[] = [
+  {
+    id: 'hik-bandwidth',
+    label: 'Bandwidth & Storage Calculator',
+    labelAr: 'حاسبة النطاق والتخزين',
+    url: 'https://hitools.hikvision.com/HiToolsDesigner/#/toolBox?site=en',
+    icon: '∑',
+    accent: '#E30613',
+  },
+  {
+    id: 'hik-videowall',
+    label: 'Video Wall Designer',
+    labelAr: 'مصمم جدار الفيديو',
+    url: 'https://hitools.hikvision.com/HiToolsDesigner/#/composeSelection/led?site=en',
+    icon: '▦',
+    accent: '#2a2a2a',
+  },
+  {
+    id: 'hik-hikcentral',
+    label: 'HIKCENTRAL Module',
+    labelAr: 'وحدة HIKCENTRAL',
+    url: 'https://hitools.hikvision.com/HiToolsDesigner/#/composeSelection/hcp?site=en',
+    icon: '⬢',
+    accent: '#E30613',
+  },
+];
+
+const OMADA_LINKS: DesignerLink[] = [
+  {
+    id: 'omada-design',
+    label: 'OMADA Project Designer',
+    labelAr: 'مصمم مشاريع أومادا',
+    url: 'https://aps1-design.tplinkcloud.com/#/projectList',
+    icon: '☁',
+    accent: '#0093DD',
+  },
 ];
 
 function FolderCard({
@@ -146,10 +200,14 @@ function LinkRow({
   link,
   isAr,
   t,
+  typeLabel,
+  typeLabelAr,
 }: {
   link: DesignerLink;
   isAr: boolean;
   t: (en: string, ar: string) => string;
+  typeLabel: string;
+  typeLabelAr: string;
 }) {
   return (
     <a href={link.url} target="_blank" rel="noreferrer"
@@ -177,7 +235,7 @@ function LinkRow({
         }}>{link.icon}</div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 9, color: '#E30613', fontWeight: 800, letterSpacing: 1.5 }}>
-            {t('CLAUDE PROJECT', 'مشروع كلود')}
+            {t(typeLabel, typeLabelAr)}
           </div>
           <div style={{ fontSize: 15, fontWeight: 800, marginTop: 2 }}>
             {isAr ? link.labelAr : link.label}
@@ -205,7 +263,7 @@ function LinkRow({
 }
 
 export default function DesignerHub({ t }: Props) {
-  const [folder, setFolder] = useState<'root' | 'claude' | 'hikvision'>('root');
+  const [folder, setFolder] = useState<'root' | 'claude' | 'hikvision' | 'omada'>('root');
   const isAr = t('x', 'y') === 'y';
 
   if (folder === 'root') {
@@ -227,8 +285,8 @@ export default function DesignerHub({ t }: Props) {
           <FolderCard
             title={t('Claude Designer', 'مصمم كلود')}
             subtitle={t(
-              'AI-powered design projects for DSPPA, CCTV and Access Control systems.',
-              'مشاريع تصميم مدعومة بالذكاء الاصطناعي لأنظمة DSPPA والكاميرات والتحكم بالدخول.',
+              'AI-powered design projects for DSPPA, CCTV, Access Control, email responses and quotation tracking.',
+              'مشاريع تصميم مدعومة بالذكاء الاصطناعي لـ DSPPA والكاميرات والتحكم بالدخول والرد على البريد ومتتبع عروض الأسعار.',
             )}
             badge={t('FOLDER', 'مجلد')}
             count={t(`${CLAUDE_LINKS.length} projects`, `${CLAUDE_LINKS.length} مشاريع`)}
@@ -238,14 +296,24 @@ export default function DesignerHub({ t }: Props) {
           <FolderCard
             title={t('HIKVISION Designer', 'مصمم HIKVISION')}
             subtitle={t(
-              'HIKVISION-specific design tools. Configuration coming soon.',
-              'أدوات تصميم خاصة بـ HIKVISION. سيتم التهيئة قريبًا.',
+              'HIKVISION design tools: bandwidth & storage, video wall, HIKCENTRAL.',
+              'أدوات تصميم HIKVISION: النطاق والتخزين، جدار الفيديو، HIKCENTRAL.',
             )}
-            badge={t('SOON', 'قريبًا')}
-            count={t('configured soon', 'قيد التهيئة')}
+            badge={t('FOLDER', 'مجلد')}
+            count={t(`${HIKVISION_LINKS.length} tools`, `${HIKVISION_LINKS.length} أدوات`)}
             onClick={() => setFolder('hikvision')}
             accent="#2a2a2a"
-            disabled
+          />
+          <FolderCard
+            title={t('OMADA (TP-LINK) Designer', 'مصمم أومادا (تي بي-لينك)')}
+            subtitle={t(
+              'TP-Link Omada cloud-based network project designer.',
+              'مصمم مشاريع شبكات أومادا السحابي من تي بي-لينك.',
+            )}
+            badge={t('FOLDER', 'مجلد')}
+            count={t(`${OMADA_LINKS.length} tools`, `${OMADA_LINKS.length} أدوات`)}
+            onClick={() => setFolder('omada')}
+            accent="#0093DD"
           />
         </div>
       </div>
@@ -290,14 +358,54 @@ export default function DesignerHub({ t }: Props) {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 720 }}>
           {CLAUDE_LINKS.map((link) => (
-            <LinkRow key={link.id} link={link} isAr={isAr} t={t} />
+            <LinkRow
+              key={link.id}
+              link={link}
+              isAr={isAr}
+              t={t}
+              typeLabel="CLAUDE PROJECT"
+              typeLabelAr="مشروع كلود"
+            />
           ))}
         </div>
       </div>
     );
   }
 
-  // hikvision
+  if (folder === 'hikvision') {
+    return (
+      <div style={{ padding: '12px 0 24px', height: '100%', overflowY: 'auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
+          {backBtn}
+          <div>
+            <div style={{
+              fontSize: 10, fontWeight: 800, letterSpacing: 1.5, opacity: 0.55,
+            }}>
+              {t('FOLDER · HIKVISION DESIGNER', 'مجلد · مصمم HIKVISION')}
+            </div>
+            <div style={{ fontSize: 22, fontWeight: 800, lineHeight: 1.1 }}>
+              {t('HIKVISION Designer', 'مصمم HIKVISION')}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 720 }}>
+          {HIKVISION_LINKS.map((link) => (
+            <LinkRow
+              key={link.id}
+              link={link}
+              isAr={isAr}
+              t={t}
+              typeLabel="HIKVISION TOOL"
+              typeLabelAr="أداة HIKVISION"
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // omada
   return (
     <div style={{ padding: '12px 0 24px', height: '100%', overflowY: 'auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
@@ -306,33 +414,25 @@ export default function DesignerHub({ t }: Props) {
           <div style={{
             fontSize: 10, fontWeight: 800, letterSpacing: 1.5, opacity: 0.55,
           }}>
-            {t('FOLDER · HIKVISION DESIGNER', 'مجلد · مصمم HIKVISION')}
+            {t('FOLDER · OMADA (TP-LINK) DESIGNER', 'مجلد · مصمم أومادا (تي بي-لينك)')}
           </div>
           <div style={{ fontSize: 22, fontWeight: 800, lineHeight: 1.1 }}>
-            {t('HIKVISION Designer', 'مصمم HIKVISION')}
+            {t('OMADA (TP-LINK) Designer', 'مصمم أومادا (تي بي-لينك)')}
           </div>
         </div>
       </div>
 
-      <div style={{
-        maxWidth: 560,
-        border: '2px dashed #2a2a2a',
-        background: '#fff',
-        padding: 28,
-        borderRadius: 4,
-        textAlign: 'center',
-        transform: 'rotate(-.3deg)',
-      }}>
-        <div style={{ fontSize: 44, marginBottom: 8 }}>🛠</div>
-        <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 6 }}>
-          {t('Configured soon', 'قيد التهيئة قريبًا')}
-        </div>
-        <div style={{ fontSize: 12, opacity: 0.7, lineHeight: 1.5 }}>
-          {t(
-            'HIKVISION Designer tools will be added here shortly.',
-            'سيتم إضافة أدوات مصمم HIKVISION هنا قريبًا.',
-          )}
-        </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 720 }}>
+        {OMADA_LINKS.map((link) => (
+          <LinkRow
+            key={link.id}
+            link={link}
+            isAr={isAr}
+            t={t}
+            typeLabel="OMADA TOOL"
+            typeLabelAr="أداة أومادا"
+          />
+        ))}
       </div>
     </div>
   );

@@ -1,5 +1,8 @@
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
 type App = {
   id: string;
   icon: string;
@@ -18,6 +21,24 @@ type Props = {
 };
 
 export default function Sidebar({ apps, active, setActive, isAr, t }: Props) {
+  const router = useRouter();
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function handleSignOut() {
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin',
+      });
+    } catch {
+      // best-effort — fall through to the redirect even on network errors
+    }
+    router.replace('/signin');
+    router.refresh();
+  }
+
   return (
     <div style={{
       borderRight: `2px dashed #2a2a2a`,
@@ -130,11 +151,34 @@ export default function Sidebar({ apps, active, setActive, isAr, t }: Props) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             background: '#fafaf7', fontWeight: 800, fontSize: 11, flexShrink: 0,
           }}>YK</div>
-          <div>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 12, fontWeight: 700 }}>Yahya Khaled</div>
             <div style={{ fontSize: 10, opacity: 0.65 }}>{t('Senior Presales', 'ما قبل البيع')}</div>
           </div>
         </div>
+        <button
+          type="button"
+          onClick={handleSignOut}
+          disabled={signingOut}
+          style={{
+            marginTop: 10,
+            width: '100%',
+            height: 28,
+            border: '2px solid #2a2a2a',
+            background: signingOut ? '#f4f1ea' : '#fafaf7',
+            fontFamily: 'inherit',
+            fontSize: 11,
+            fontWeight: 800,
+            letterSpacing: 1,
+            cursor: signingOut ? 'wait' : 'pointer',
+            borderRadius: 3,
+            color: '#2a2a2a',
+          }}
+        >
+          {signingOut
+            ? t('SIGNING OUT…', 'جاري تسجيل الخروج…')
+            : t('SIGN OUT ↗', 'تسجيل الخروج ↗')}
+        </button>
       </div>
 
       <div style={{ marginTop: 'auto', paddingTop: 16, fontSize: 10, opacity: 0.5 }}>

@@ -1,24 +1,9 @@
 /** @type {import('next').NextConfig} */
 
-// Next.js (with Google Fonts via next/font) inlines a small amount of
-// CSS, so we keep `'unsafe-inline'` for `style-src`. We avoid
-// `'unsafe-inline'` and `'unsafe-eval'` for `script-src`.
-const csp = [
-  "default-src 'self'",
-  "script-src 'self'" + (process.env.NODE_ENV === "production" ? "" : " 'unsafe-eval' 'unsafe-inline'"),
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "img-src 'self' data: blob:",
-  "font-src 'self' data: https://fonts.gstatic.com",
-  "connect-src 'self'",
-  "frame-ancestors 'none'",
-  "form-action 'self'",
-  "base-uri 'self'",
-  "object-src 'none'",
-  "upgrade-insecure-requests",
-].join("; ");
-
+// Note: Content-Security-Policy is set per-request in middleware.ts so
+// it can include a fresh nonce for Next.js's inline RSC/hydration
+// scripts. The static headers below apply to every response.
 const securityHeaders = [
-  { key: "Content-Security-Policy", value: csp },
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },

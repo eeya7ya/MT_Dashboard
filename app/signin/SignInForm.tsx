@@ -124,41 +124,38 @@ export default function SignInForm({ next }: Props) {
         maxLength={128}
       />
 
-      <div style={{ position: "relative" }}>
-        <Field
-          id="password"
-          label="Password"
-          type={showPw ? "text" : "password"}
-          autoComplete="current-password"
-          value={password}
-          onChange={setPassword}
-          required
-          maxLength={1024}
-          paddingRight={68}
-        />
-        <button
-          type="button"
-          onClick={() => setShowPw((s) => !s)}
-          aria-pressed={showPw}
-          aria-label={showPw ? "Hide password" : "Show password"}
-          style={{
-            position: "absolute",
-            right: 8,
-            top: 30,
-            height: 30,
-            padding: "0 8px",
-            border: "2px solid #2a2a2a",
-            background: "#fafaf7",
-            fontFamily: "inherit",
-            fontSize: 11,
-            fontWeight: 700,
-            cursor: "pointer",
-            borderRadius: 3,
-          }}
-        >
-          {showPw ? "hide" : "show"}
-        </button>
-      </div>
+      <Field
+        id="password"
+        label="Password"
+        type={showPw ? "text" : "password"}
+        autoComplete="current-password"
+        value={password}
+        onChange={setPassword}
+        required
+        maxLength={1024}
+        rightAdornment={
+          <button
+            type="button"
+            onClick={() => setShowPw((s) => !s)}
+            aria-pressed={showPw}
+            aria-label={showPw ? "Hide password" : "Show password"}
+            style={{
+              height: 28,
+              padding: "0 10px",
+              border: "2px solid #2a2a2a",
+              background: "#fff",
+              fontFamily: "inherit",
+              fontSize: 11,
+              fontWeight: 700,
+              cursor: "pointer",
+              borderRadius: 3,
+              lineHeight: 1,
+            }}
+          >
+            {showPw ? "hide" : "show"}
+          </button>
+        }
+      />
 
       {error && (
         <div
@@ -226,7 +223,7 @@ type FieldProps = {
   autoFocus?: boolean;
   required?: boolean;
   maxLength?: number;
-  paddingRight?: number;
+  rightAdornment?: React.ReactNode;
 };
 
 function Field({
@@ -239,7 +236,7 @@ function Field({
   autoFocus,
   required,
   maxLength,
-  paddingRight,
+  rightAdornment,
 }: FieldProps) {
   return (
     <div style={{ marginBottom: 14 }}>
@@ -256,30 +253,46 @@ function Field({
       >
         {label.toUpperCase()}
       </label>
-      <input
-        id={id}
-        name={id}
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        autoComplete={autoComplete}
-        autoFocus={autoFocus}
-        required={required}
-        maxLength={maxLength}
-        spellCheck={false}
-        style={{
-          width: "100%",
-          height: 40,
-          border: "2px solid #2a2a2a",
-          background: "#fafaf7",
-          fontFamily: "inherit",
-          fontSize: 14,
-          padding: `0 ${paddingRight ?? 10}px 0 10px`,
-          borderRadius: 3,
-          color: "#2a2a2a",
-          outline: "none",
-        }}
-      />
+      <div style={{ position: "relative" }}>
+        <input
+          id={id}
+          name={id}
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          autoComplete={autoComplete}
+          autoFocus={autoFocus}
+          required={required}
+          maxLength={maxLength}
+          spellCheck={false}
+          style={{
+            width: "100%",
+            height: 40,
+            border: "2px solid #2a2a2a",
+            background: "#fafaf7",
+            fontFamily: "inherit",
+            fontSize: 14,
+            padding: `0 ${rightAdornment ? 64 : 10}px 0 10px`,
+            borderRadius: 3,
+            color: "#2a2a2a",
+            outline: "none",
+          }}
+        />
+        {rightAdornment && (
+          <div
+            style={{
+              position: "absolute",
+              right: 6,
+              top: "50%",
+              transform: "translateY(-50%)",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            {rightAdornment}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

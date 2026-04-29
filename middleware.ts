@@ -12,68 +12,14 @@ function isPublic(pathname: string): boolean {
   return false;
 }
 
-function buildCsp(nonce: string): string {
-  const isDev = process.env.NODE_ENV !== "production";
-  // Next.js App Router streams the RSC payload via inline <script> tags
-  // and hydrates with inline JSON, so a strict CSP must allow those by
-  // nonce. `'strict-dynamic'` then allows any scripts loaded by nonced
-  // scripts (e.g. webpack chunks) while still blocking everything else.
-  const scriptSrc = [
-    "'self'",
-    `'nonce-${nonce}'`,
-    "'strict-dynamic'",
-    isDev ? "'unsafe-eval'" : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  return [
-    "default-src 'self'",
-    `script-src ${scriptSrc}`,
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "img-src 'self' data: blob:",
-    "font-src 'self' data: https://fonts.gstatic.com",
-    "connect-src 'self'",
-    "frame-ancestors 'none'",
-    "form-action 'self'",
-    "base-uri 'self'",
-    "object-src 'none'",
-    "upgrade-insecure-requests",
-  ].join("; ");
-}
-
-function applyCsp(res: NextResponse, csp: string): NextResponse {
-  res.headers.set("Content-Security-Policy", csp);
-  return res;
-}
-
 export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
 
-  // Generate a per-request nonce. Next.js automatically picks this up
-  // for its own inline scripts when it sees a CSP nonce in the request.
-  const nonce = crypto.randomUUID().replace(/-/g, "");
-  const csp = buildCsp(nonce);
-
-  const requestHeaders = new Headers(req.headers);
-  requestHeaders.set("x-nonce", nonce);
-  requestHeaders.set("content-security-policy", csp);
-
-  if (isPublic(pathname)) {
-    return applyCsp(
-      NextResponse.next({ request: { headers: requestHeaders } }),
-      csp,
-    );
-  }
+  if (isPublic(pathname)) return NextResponse.next();
 
   const token = req.cookies.get(SESSION_COOKIE)?.value;
   const session = await verifySessionToken(token);
-  if (session) {
-    return applyCsp(
-      NextResponse.next({ request: { headers: requestHeaders } }),
-      csp,
-    );
-  }
+  if (session) return NextResponse.next();
 
   const url = req.nextUrl.clone();
   url.pathname = "/signin";
@@ -82,7 +28,7 @@ export async function middleware(req: NextRequest) {
     url.searchParams.set("next", pathname + (search || ""));
   }
 
-  const response = applyCsp(NextResponse.redirect(url), csp);
+  const response = NextResponse.redirect(url);
   if (token) {
     response.cookies.set({
       name: SESSION_COOKIE,

@@ -4,6 +4,9 @@
 
 import { scrypt as scryptCb, timingSafeEqual, randomBytes } from "node:crypto";
 import { promisify } from "node:util";
+import { parseStoredUsers } from "./profile";
+
+export type { StoredUser } from "./profile";
 
 const scrypt = promisify(scryptCb) as (
   password: string,
@@ -12,32 +15,6 @@ const scrypt = promisify(scryptCb) as (
 ) => Promise<Buffer>;
 
 const KEY_LEN = 64;
-
-export type StoredUser = {
-  username: string;
-  /** hex-encoded salt */
-  salt: string;
-  /** hex-encoded scrypt-derived key */
-  hash: string;
-};
-
-function parseUsers(): StoredUser[] {
-  const raw = process.env.AUTH_USERS;
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (u): u is StoredUser =>
-        u &&
-        typeof u.username === "string" &&
-        typeof u.salt === "string" &&
-        typeof u.hash === "string",
-    );
-  } catch {
-    return [];
-  }
-}
 
 /**
  * Verify a username/password pair in constant time relative to whether
@@ -59,7 +36,7 @@ export async function verifyCredentials(
     return { ok: false };
   }
 
-  const users = parseUsers();
+  const users = parseStoredUsers();
   const normalized = username.trim().toLowerCase();
   const user = users.find((u) => u.username.trim().toLowerCase() === normalized);
 

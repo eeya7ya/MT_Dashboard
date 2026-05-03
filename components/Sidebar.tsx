@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import type { Profile } from '@/lib/profile';
 
 type App = {
   id: string;
@@ -18,9 +19,10 @@ type Props = {
   setActive: (id: string) => void;
   isAr: boolean;
   t: (en: string, ar: string) => string;
+  user: Profile;
 };
 
-export default function Sidebar({ apps, active, setActive, isAr, t }: Props) {
+export default function Sidebar({ apps, active, setActive, isAr, t, user }: Props) {
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
 
@@ -150,10 +152,10 @@ export default function Sidebar({ apps, active, setActive, isAr, t }: Props) {
             width: 32, height: 32, borderRadius: '50%', border: '2px solid #2a2a2a',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             background: '#fafaf7', fontWeight: 800, fontSize: 11, flexShrink: 0,
-          }}>YK</div>
+          }}>{user.initials}</div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 12, fontWeight: 700 }}>Yahya Khaled</div>
-            <div style={{ fontSize: 10, opacity: 0.65 }}>{t('Senior Presales', 'ما قبل البيع')}</div>
+            <div style={{ fontSize: 12, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.displayName}</div>
+            <div style={{ fontSize: 10, opacity: 0.65, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.role}</div>
           </div>
         </div>
         <button

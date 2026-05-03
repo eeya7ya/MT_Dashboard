@@ -4,7 +4,7 @@
 
 import { scrypt as scryptCb, timingSafeEqual, randomBytes } from "node:crypto";
 import { promisify } from "node:util";
-import { parseStoredUsers } from "./profile";
+import { dbGetCredentials } from "./users";
 
 export type { StoredUser } from "./profile";
 
@@ -36,9 +36,14 @@ export async function verifyCredentials(
     return { ok: false };
   }
 
-  const users = parseStoredUsers();
-  const normalized = username.trim().toLowerCase();
-  const user = users.find((u) => u.username.trim().toLowerCase() === normalized);
+  let user: Awaited<ReturnType<typeof dbGetCredentials>> = null;
+  try {
+    user = await dbGetCredentials(username);
+  } catch {
+    // Fall through and run scrypt against decoy material so timing
+    // doesn't reveal a DB outage either.
+    user = null;
+  }
 
   // Always run scrypt against *something* to keep timing similar.
   const decoySalt = randomBytes(16);
@@ -70,7 +75,7 @@ function safeHexToBuffer(hex: string): Buffer {
 
 /**
  * Generate a new salt+hash pair for a password. Used by the
- * scripts/hash-password.mjs CLI helper.
+ * scripts/hash-password.mjs CLI helper and the admin panel.
  */
 export async function hashPassword(
   password: string,

@@ -7,12 +7,6 @@ type Props = {
   t: (en: string, ar: string) => string;
 };
 
-type GenerateResult = {
-  entry: Record<string, unknown>;
-  authUsers: string;
-  replaced: boolean;
-};
-
 export default function AdminHub({ t }: Props) {
   const [users, setUsers] = useState<Profile[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -25,18 +19,17 @@ export default function AdminHub({ t }: Props) {
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [result, setResult] = useState<GenerateResult | null>(null);
-  const [copied, setCopied] = useState<'entry' | 'env' | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [busyUser, setBusyUser] = useState<string | null>(null);
 
   async function loadUsers() {
     try {
       const res = await fetch('/api/admin/users', { credentials: 'same-origin' });
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
         setLoadError(data?.error ?? `HTTP ${res.status}`);
         return;
       }
-      const data = await res.json();
       setUsers(data.users ?? []);
       setLoadError(null);
     } catch (err) {
@@ -52,7 +45,7 @@ export default function AdminHub({ t }: Props) {
     e.preventDefault();
     if (submitting) return;
     setSubmitError(null);
-    setResult(null);
+    setSuccessMsg(null);
     setSubmitting(true);
     try {
       const res = await fetch('/api/admin/users', {
@@ -72,10 +65,16 @@ export default function AdminHub({ t }: Props) {
         setSubmitError(data?.error ?? `HTTP ${res.status}`);
         return;
       }
-      setResult(data);
+      setSuccessMsg(
+        data.created
+          ? t(`User "${data.profile.username}" created.`, `تم إنشاء المستخدم "${data.profile.username}".`)
+          : t(`User "${data.profile.username}" updated.`, `تم تحديث المستخدم "${data.profile.username}".`),
+      );
+      setUsername('');
       setPassword('');
-      // Refresh the list so a known username shows the warning correctly
-      // next time, even though the env hasn't been updated yet.
+      setDisplayName('');
+      setRole('');
+      setIsAdmin(false);
       loadUsers();
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Network error');
@@ -84,14 +83,49 @@ export default function AdminHub({ t }: Props) {
     }
   }
 
-  async function copy(value: string, which: 'entry' | 'env') {
+  async function onDelete(target: Profile) {
+    if (busyUser) return;
+    const ok = window.confirm(
+      t(
+        `Delete "${target.displayName}" (@${target.username})? This can't be undone.`,
+        `حذف "${target.displayName}" (@${target.username})؟ لا يمكن التراجع.`,
+      ),
+    );
+    if (!ok) return;
+    setBusyUser(target.username);
+    setSubmitError(null);
+    setSuccessMsg(null);
     try {
-      await navigator.clipboard.writeText(value);
-      setCopied(which);
-      setTimeout(() => setCopied(null), 1500);
-    } catch {
-      // Ignore clipboard errors — the textarea allows manual copy.
+      const res = await fetch('/api/admin/users', {
+        method: 'DELETE',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: target.username }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setSubmitError(data?.error ?? `HTTP ${res.status}`);
+        return;
+      }
+      setSuccessMsg(
+        t(`Deleted "${target.username}".`, `تم حذف "${target.username}".`),
+      );
+      loadUsers();
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Network error');
+    } finally {
+      setBusyUser(null);
     }
+  }
+
+  function loadIntoForm(u: Profile) {
+    setUsername(u.username);
+    setDisplayName(u.displayName);
+    setRole(u.role === 'Member' ? '' : u.role);
+    setIsAdmin(u.isAdmin);
+    setPassword('');
+    setSuccessMsg(null);
+    setSubmitError(null);
   }
 
   const fieldStyle: React.CSSProperties = {
@@ -129,8 +163,8 @@ export default function AdminHub({ t }: Props) {
         </div>
         <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, maxWidth: 640, lineHeight: 1.5 }}>
           {t(
-            'Add or update sign-in profiles. The server hashes the password and returns a JSON snippet. Paste it into the AUTH_USERS environment variable on Vercel and redeploy for the change to take effect.',
-            'إضافة أو تحديث ملفات تسجيل الدخول. يقوم الخادم بتجزئة كلمة المرور ويعيد مقتطف JSON. الصق المقتطف في متغير البيئة AUTH_USERS على Vercel وأعد النشر ليصبح التغيير ساريًا.',
+            'Add, edit, or remove sign-in profiles. Changes are saved instantly to the database — no redeploy needed.',
+            'إضافة أو تعديل أو حذف ملفات تسجيل الدخول. يتم حفظ التغييرات فورًا في قاعدة البيانات — دون الحاجة إلى إعادة النشر.',
           )}
         </div>
       </div>
@@ -147,7 +181,7 @@ export default function AdminHub({ t }: Props) {
             fontSize: 10, fontWeight: 800, letterSpacing: 1.5, opacity: 0.6,
             marginBottom: 12,
           }}>
-            {t('CONFIGURED USERS', 'المستخدمون المُعدَّون')}
+            {t('USERS', 'المستخدمون')}
           </div>
           {loadError && (
             <div style={{ fontSize: 12, color: '#E30613', marginBottom: 8 }}>
@@ -194,6 +228,38 @@ export default function AdminHub({ t }: Props) {
                       padding: '2px 6px', borderRadius: 2,
                     }}>{t('ADMIN', 'مدير')}</span>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => loadIntoForm(u)}
+                    title={t('Edit', 'تعديل')}
+                    style={{
+                      border: '1.5px solid #2a2a2a',
+                      background: '#fff',
+                      width: 26, height: 26,
+                      fontSize: 12, fontWeight: 800,
+                      cursor: 'pointer',
+                      borderRadius: 3,
+                      fontFamily: 'inherit',
+                      flexShrink: 0,
+                    }}
+                  >✎</button>
+                  <button
+                    type="button"
+                    disabled={busyUser === u.username}
+                    onClick={() => onDelete(u)}
+                    title={t('Delete', 'حذف')}
+                    style={{
+                      border: '1.5px solid #E30613',
+                      background: '#fff',
+                      color: '#E30613',
+                      width: 26, height: 26,
+                      fontSize: 12, fontWeight: 800,
+                      cursor: busyUser === u.username ? 'wait' : 'pointer',
+                      borderRadius: 3,
+                      fontFamily: 'inherit',
+                      flexShrink: 0,
+                    }}
+                  >×</button>
                 </div>
               ))}
             </div>
@@ -212,6 +278,12 @@ export default function AdminHub({ t }: Props) {
             fontSize: 10, fontWeight: 800, letterSpacing: 1.5, opacity: 0.6,
           }}>
             {t('ADD OR UPDATE USER', 'إضافة أو تحديث مستخدم')}
+          </div>
+          <div style={{ fontSize: 11, opacity: 0.65, lineHeight: 1.4 }}>
+            {t(
+              'Submitting an existing username updates that user (and resets their password to the one you enter).',
+              'إرسال اسم مستخدم موجود يقوم بتحديث ذلك المستخدم (ويعيد تعيين كلمة المرور إلى التي أدخلتها).',
+            )}
           </div>
 
           <div>
@@ -282,6 +354,9 @@ export default function AdminHub({ t }: Props) {
           {submitError && (
             <div style={{ fontSize: 12, color: '#E30613' }}>{submitError}</div>
           )}
+          {successMsg && (
+            <div style={{ fontSize: 12, color: '#1a7a3a', fontWeight: 700 }}>{successMsg}</div>
+          )}
 
           <button
             type="submit"
@@ -302,93 +377,9 @@ export default function AdminHub({ t }: Props) {
             }}
           >
             {submitting
-              ? t('GENERATING…', 'جارٍ الإنشاء…')
-              : t('GENERATE ENTRY', 'إنشاء المُدخل')}
+              ? t('SAVING…', 'جارٍ الحفظ…')
+              : t('SAVE USER', 'حفظ المستخدم')}
           </button>
-
-          {result && (
-            <div style={{
-              borderTop: '1.5px dashed #2a2a2a',
-              paddingTop: 12,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 10,
-            }}>
-              <div style={{ fontSize: 12, fontWeight: 700 }}>
-                {result.replaced
-                  ? t('Profile updated for existing username.', 'تم تحديث الملف لاسم المستخدم الحالي.')
-                  : t('New profile generated.', 'تم إنشاء ملف جديد.')}
-              </div>
-              <div style={{ fontSize: 11, opacity: 0.75, lineHeight: 1.5 }}>
-                {t(
-                  'This is not yet live. Update AUTH_USERS in your Vercel project settings (or .env.local for local dev) and redeploy.',
-                  'لم يصبح ساريًا بعد. حدّث AUTH_USERS في إعدادات مشروع Vercel (أو .env.local للتطوير المحلي) وأعد النشر.',
-                )}
-              </div>
-
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <label style={labelStyle}>{t('Single entry (JSON)', 'مُدخل واحد (JSON)')}</label>
-                  <button
-                    type="button"
-                    onClick={() => copy(JSON.stringify(result.entry), 'entry')}
-                    style={{
-                      border: '1.5px solid #2a2a2a',
-                      background: '#fff',
-                      padding: '2px 8px',
-                      fontSize: 10,
-                      fontWeight: 800,
-                      cursor: 'pointer',
-                      borderRadius: 3,
-                      fontFamily: 'inherit',
-                    }}
-                  >{copied === 'entry' ? t('COPIED', 'تم النسخ') : t('COPY', 'نسخ')}</button>
-                </div>
-                <textarea
-                  readOnly
-                  value={JSON.stringify(result.entry, null, 2)}
-                  rows={6}
-                  style={{
-                    ...fieldStyle,
-                    fontFamily: 'monospace',
-                    fontSize: 11,
-                    resize: 'vertical',
-                  }}
-                />
-              </div>
-
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <label style={labelStyle}>{t('Full AUTH_USERS value', 'قيمة AUTH_USERS كاملة')}</label>
-                  <button
-                    type="button"
-                    onClick={() => copy(result.authUsers, 'env')}
-                    style={{
-                      border: '1.5px solid #2a2a2a',
-                      background: '#fff',
-                      padding: '2px 8px',
-                      fontSize: 10,
-                      fontWeight: 800,
-                      cursor: 'pointer',
-                      borderRadius: 3,
-                      fontFamily: 'inherit',
-                    }}
-                  >{copied === 'env' ? t('COPIED', 'تم النسخ') : t('COPY', 'نسخ')}</button>
-                </div>
-                <textarea
-                  readOnly
-                  value={result.authUsers}
-                  rows={4}
-                  style={{
-                    ...fieldStyle,
-                    fontFamily: 'monospace',
-                    fontSize: 11,
-                    resize: 'vertical',
-                  }}
-                />
-              </div>
-            </div>
-          )}
         </form>
       </div>
     </div>

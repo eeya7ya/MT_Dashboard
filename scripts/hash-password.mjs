@@ -7,7 +7,13 @@
 //   node scripts/hash-password.mjs yahya 'correct horse battery staple'
 //
 // The output is a single JSON object — drop it into the AUTH_USERS
-// array in your .env.local.
+// array in your .env.local. You can extend the entry with optional
+// profile fields:
+//   { "username": "...", "salt": "...", "hash": "...",
+//     "displayName": "Yahya Khaled", "role": "Senior Presales",
+//     "isAdmin": true }
+// Admins logged into the running app can also generate entries via
+// the in-app admin panel.
 
 import { scrypt as scryptCb, randomBytes } from "node:crypto";
 import { promisify } from "node:util";

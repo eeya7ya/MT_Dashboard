@@ -7,8 +7,14 @@ import OverviewOrbit from './OverviewOrbit';
 import LauncherCard from './LauncherCard';
 import ManufacturerBar from './ManufacturerBar';
 import DesignerHub from './DesignerHub';
+import AdminHub from './AdminHub';
+import type { Profile } from '@/lib/profile';
 
-export default function PresalesHub() {
+type Props = {
+  user: Profile;
+};
+
+export default function PresalesHub({ user }: Props) {
   const [lang, setLang] = useState<'en' | 'ar'>('en');
   const [active, setActive] = useState('overview');
 
@@ -40,6 +46,15 @@ export default function PresalesHub() {
       icon: '📁',
       label: t('Designer', 'المصمم'),
     },
+    ...(user.isAdmin
+      ? [
+          {
+            id: 'admin',
+            icon: '⚙',
+            label: t('Admin', 'الإدارة'),
+          },
+        ]
+      : []),
     { id: '_soon1', icon: '＋', label: t('Add app', 'إضافة تطبيق'), soon: true },
   ];
 
@@ -79,6 +94,7 @@ export default function PresalesHub() {
           setActive={setActive}
           isAr={isAr}
           t={t}
+          user={user}
         />
       </div>
 
@@ -126,6 +142,9 @@ export default function PresalesHub() {
           )}
           {active === 'designer' && (
             <DesignerHub t={t} />
+          )}
+          {active === 'admin' && user.isAdmin && (
+            <AdminHub t={t} />
           )}
         </div>
 

@@ -116,11 +116,11 @@ export async function POST(req: Request) {
   }
   if (
     typeof password !== "string" ||
-    password.length < 12 ||
+    password.length < 6 ||
     password.length > 1024
   ) {
     return NextResponse.json(
-      { error: "Password must be at least 12 characters." },
+      { error: "Password must be at least 6 characters." },
       { status: 400 },
     );
   }

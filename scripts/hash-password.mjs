@@ -27,9 +27,9 @@ if (!username || !password) {
   process.exit(1);
 }
 
-if (password.length < 12) {
+if (password.length < 6) {
   console.error(
-    "Refusing to hash a password shorter than 12 characters. Pick a stronger one.",
+    "Refusing to hash a password shorter than 6 characters. Pick a stronger one.",
   );
   process.exit(1);
 }

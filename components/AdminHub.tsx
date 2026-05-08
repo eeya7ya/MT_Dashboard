@@ -301,7 +301,7 @@ export default function AdminHub({ t }: Props) {
           </div>
 
           <div>
-            <label style={labelStyle}>{t('Password (min 12 chars)', 'كلمة المرور (12 حرفًا على الأقل)')}</label>
+            <label style={labelStyle}>{t('Password (min 6 chars)', 'كلمة المرور (6 أحرف على الأقل)')}</label>
             <input
               style={fieldStyle}
               type="password"
@@ -309,7 +309,7 @@ export default function AdminHub({ t }: Props) {
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
               required
-              minLength={12}
+              minLength={6}
               maxLength={1024}
             />
           </div>
